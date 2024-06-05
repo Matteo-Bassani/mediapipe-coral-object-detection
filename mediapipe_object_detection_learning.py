@@ -5,6 +5,7 @@ import subprocess
 import wandb
 from mediapipe_model_maker import quantization, object_detector
 from libs import object_detector_extended
+from keras.callbacks import EarlyStopping
 
 # Settings
 DATASET_TRAIN_PATH = "datasettrain/"
@@ -39,6 +40,8 @@ class WandbCallback(tf.keras.callbacks.Callback):
         wandb.log(logs)
 
 
+early_stopping_callback = EarlyStopping(monitor='box_loss', patience=3)
+
 # Extract train and validation data
 train_data = object_detector_extended.Dataset.from_pascal_voc_folder(DATASET_TRAIN_PATH)
 validation_data = object_detector_extended.Dataset.from_pascal_voc_folder(DATASET_VAL_PATH)
@@ -61,7 +64,7 @@ model = object_detector_extended.ObjectDetector.create(
     train_data=train_data,
     validation_data=validation_data,
     options=options,
-    callbacks=WandbCallback(),
+    callbacks=[WandbCallback(), early_stopping_callback]
 )
 
 # Evaluate model performance

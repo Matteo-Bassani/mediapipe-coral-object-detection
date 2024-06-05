@@ -17,10 +17,10 @@ from mediapipe_model_maker.python.vision.object_detector import dataset
 from mediapipe_model_maker.python.vision.object_detector import hyperparameters
 from mediapipe_model_maker.python.vision.object_detector import model_options
 from mediapipe_model_maker.python.vision.object_detector import model_spec
-from mediapipe_model_maker.python.vision.object_detector import object_detector
+from .object_detector_extended import ObjectDetector
 from mediapipe_model_maker.python.vision.object_detector import object_detector_options
 
-ObjectDetector = object_detector.ObjectDetector
+ObjectDetector = ObjectDetector
 ModelOptions = model_options.ObjectDetectorModelOptions
 ModelSpec = model_spec.ModelSpec
 SupportedModels = model_spec.SupportedModels

@@ -1,4 +1,4 @@
-from libs import classifier_extended
+from libs.classifier_extended import classifier_extended
 
 import os
 import tempfile
@@ -54,7 +54,7 @@ class ObjectDetector(classifier_extended.ClassifierExtended):
             validation_data: ds.Dataset,
             options: object_detector_options.ObjectDetectorOptions,
             # ADD
-            callbacks: tf.keras.callbacks.Callback
+            callbacks: Sequence[tf.keras.callbacks.Callback]
     ) -> 'ObjectDetector':
         """Creates and trains an ObjectDetector.
 
@@ -67,6 +67,7 @@ class ObjectDetector(classifier_extended.ClassifierExtended):
 
     Returns:
       An instance of ObjectDetector.
+        :param callbacks:
     """
         if options.hparams is None:
             options.hparams = hp.HParams()
@@ -85,7 +86,7 @@ class ObjectDetector(classifier_extended.ClassifierExtended):
         return object_detector
 
     def _create_and_train_model(
-            self, train_data: ds.Dataset, validation_data: ds.Dataset, callbacks: tf.keras.callbacks.Callback  # ADD
+            self, train_data: ds.Dataset, validation_data: ds.Dataset, callbacks: Sequence[tf.keras.callbacks.Callback]  # ADD
     ):
         """Creates and trains the model.
 
