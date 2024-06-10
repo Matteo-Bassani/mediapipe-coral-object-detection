@@ -3,9 +3,3 @@ __pycache__
 *.pyc
 .pytest_cache
 .idea
-
-datasettrain/
-datasetval/
-wandb/
-databases/
-exported_models/

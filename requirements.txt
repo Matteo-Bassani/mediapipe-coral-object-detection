@@ -1,5 +1,5 @@
 tensorflow~=2.13.1
-mediapipe~=0.10.11
+mediapipe-model-maker
 optuna~=3.6.1
 wandb~=0.16.5
 keras~=2.13.1

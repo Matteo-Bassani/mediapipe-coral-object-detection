@@ -5,11 +5,11 @@ from settings import *
 import wandb
 
 
-def train(train_data, validation_data, hyperparameters, log_wandb):
-    if log_wandb:
+def train(train_data, validation_data, hyperparameters, wandb_name):
+    if wandb_name:
         # Wandb settings
         wandb.init(
-            project="Coral Board Transfer Learning",
+            project=wandb_name,
             config={
                 "learning_rate": hyperparameters['lr'],
                 "batch_size": hyperparameters['batch_size'],
@@ -17,12 +17,13 @@ def train(train_data, validation_data, hyperparameters, log_wandb):
             }
         )
 
-        # Set Wandb Callback
-        class WandbCallback(tf.keras.callbacks.Callback):
-            def on_epoch_end(self, epoch, logs=None):
-                wandb.log(logs)
+    # Set Wandb Callback
+    class WandbCallback(tf.keras.callbacks.Callback):
+        def on_epoch_end(self, epoch, logs=None):
+            wandb.log(logs)
 
-    early_stopping_callback = EarlyStopping(monitor='box_loss', patience=3)
+    # Set early stopping callback
+    early_stopping_callback = EarlyStopping(monitor='box_loss', patience=EARLY_STOPPING_PATIENCE, restore_best_weights=True)
 
     # Load pre-trained model and specify hyperparameters
     spec = object_detector_extended.SupportedModels.MOBILENET_V2_I320
@@ -37,7 +38,7 @@ def train(train_data, validation_data, hyperparameters, log_wandb):
         hparams=hparams,
     )
 
-    if log_wandb:
+    if wandb_name:
         # Retrain model
         model = object_detector_extended.ObjectDetector.create(
             train_data=train_data,

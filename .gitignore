@@ -176,9 +176,8 @@ pyrightconfig.json
 # End of https://www.toptal.com/developers/gitignore/api/python
 
 # Added
-datasettrain/
-datasetval/
+dataset/
 wandb/
 .idea/
-databases/
+hyperparameters/
 exported_models/

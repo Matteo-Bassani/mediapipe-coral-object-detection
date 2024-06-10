@@ -6,6 +6,8 @@ from settings import *
 from libs import object_detector_extended
 from core.mediapipe_object_detection_learning import train
 
+WANDB = None
+
 
 def objective(trial):
     train_data = object_detector_extended.Dataset.from_pascal_voc_folder(DATASET_TRAIN_PATH)
@@ -18,10 +20,12 @@ def objective(trial):
         'epochs': epochs,
         'batch_size': batch_size,
     }
+    global WANDB
+
     model, loss, coco_metrics = train(train_data, validation_data, hyperparameters, WANDB)
 
     # Export 32-bit float model
-    model.export_model(model_name='model_{}.tflite'.format(trial.number))
+    model.export_model(model_name='hyperparameters/exported/model_{}.tflite'.format(trial.number))
 
     # Perform post-training quantization (8-bit integer) and save quantized model
     quantization_config = quantization.QuantizationConfig.for_int8(
@@ -29,7 +33,7 @@ def objective(trial):
     )
     model.restore_float_ckpt()
     model.export_model(
-        model_name='model_int8_{}.tflite'.format(trial.number),
+        model_name='hyperparameters/exported/model_int8_{}.tflite'.format(trial.number),
         quantization_config=quantization_config,
     )
 
@@ -53,12 +57,16 @@ def create_sampler(sampler_method) -> BaseSampler:
     return sampler
 
 
-def optimize_hyperparameters(name="Study1"):
+def optimize_hyperparameters(name="Study1", wandb_name=None):
     # Study name is initialized
     study_name = name
 
+    # Wandb is initialized
+    global WANDB
+    WANDB = wandb_name
+
     # Path to databases is created
-    path_databases = "databases/"
+    path_databases = "hyperparameters/databases/"
     if not os.path.exists(path_databases):
         os.makedirs(path_databases)
     storage_name = "sqlite:///{}.db".format(path_databases + study_name)

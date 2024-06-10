@@ -28,7 +28,7 @@ session.wait()
 dataset_type = fo.types.VOCDetectionDataset
 
 dataset.export(
-    export_dir="../datasettrain",
+    export_dir="../dataset/train",
     dataset_type=dataset_type,
     label_field="ground_truth", 
 )

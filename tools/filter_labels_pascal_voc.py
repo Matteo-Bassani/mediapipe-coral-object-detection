@@ -1,7 +1,7 @@
 import os
 import xml.etree.ElementTree as ET
 
-DATASET_TRAIN_PATH = "../datasettrain/"
+DATASET_TRAIN_PATH = "../dataset/train/"
 DATASET_VAL_PATH = "../datasetval/"
 
 
