@@ -1,4 +1,7 @@
 import optuna
+from mediapipe_model_maker import quantization
+from optuna.samplers import BaseSampler, TPESampler, RandomSampler
+
 from settings import *
 from libs import object_detector_extended
 from core.mediapipe_object_detection_learning import train
@@ -7,17 +10,86 @@ from core.mediapipe_object_detection_learning import train
 def objective(trial):
     train_data = object_detector_extended.Dataset.from_pascal_voc_folder(DATASET_TRAIN_PATH)
     validation_data = object_detector_extended.Dataset.from_pascal_voc_folder(DATASET_VAL_PATH)
-    lr = trial.suggest_float('lr', 0.001, 0.1)
-    batch_size = trial.suggest_int('batch_size', 8, 32, log=True)
-    epochs = trial.suggest_int('epochs', 10, 50)
+    lr = trial.suggest_categorical('lr', [0.001, 0.005, 0.01, 0.05, 0.1, 0.5])  # def 0.3
+    batch_size = trial.suggest_categorical("batch_size", [8, 16, 32, 64])  # def 8
+    epochs = trial.suggest_categorical('epochs', [10, 20, 30])  # def 10
     hyperparameters = {
         'lr': lr,
-        'epochs': batch_size,
-        'batch_size': epochs,
+        'epochs': epochs,
+        'batch_size': batch_size,
     }
-    _, loss, coco_metrics = train(train_data, validation_data, hyperparameters, 0)
-    return coco_metrics.get('AP')
+    model, loss, coco_metrics = train(train_data, validation_data, hyperparameters, WANDB)
+
+    # Export 32-bit float model
+    model.export_model(model_name='model_{}.tflite'.format(trial.number))
+
+    # Perform post-training quantization (8-bit integer) and save quantized model
+    quantization_config = quantization.QuantizationConfig.for_int8(
+        representative_data=validation_data,
+    )
+    model.restore_float_ckpt()
+    model.export_model(
+        model_name='model_int8_{}.tflite'.format(trial.number),
+        quantization_config=quantization_config,
+    )
+
+    # Get average precision and recall
+    average_precision = coco_metrics.get('AP')
+    average_recall = coco_metrics.get('ARmax100')
+    f1_score = 2 * (average_precision * average_recall) / (average_precision + average_recall)
+    return f1_score
 
 
-study = optuna.create_study()
-study.optimize(objective, n_trials=MAX_TRIALS)
+def create_sampler(sampler_method) -> BaseSampler:
+    if sampler_method == "random":
+        sampler = RandomSampler()
+    elif sampler_method == "tpe":
+        sampler = TPESampler(n_startup_trials=STARTUP_TRIALS, multivariate=True)
+    elif sampler_method == "skopt":
+        from optuna.integration.skopt import SkoptSampler
+        sampler = SkoptSampler(skopt_kwargs={"base_estimator": "GP", "acq_func": "gp_hedge"})
+    else:
+        raise ValueError(f"Unknown sampler: {sampler_method}")
+    return sampler
+
+
+def optimize_hyperparameters(name="Study1"):
+    # Study name is initialized
+    study_name = name
+
+    # Path to databases is created
+    path_databases = "databases/"
+    if not os.path.exists(path_databases):
+        os.makedirs(path_databases)
+    storage_name = "sqlite:///{}.db".format(path_databases + study_name)
+
+    # Study is created
+    study = optuna.create_study(study_name=study_name,
+                                storage=storage_name,
+                                sampler=create_sampler("tpe"),
+                                direction="maximize",
+                                load_if_exists=True)
+
+    # Prints command to launch optuna-dashboard
+    dashboard_command = "optuna-dashboard " + storage_name
+    print(dashboard_command)
+
+    # Info about study are printed, dataframe is empty if the study is new
+    info_study = study.trials_dataframe(attrs=("number", "value", "params", "state"))
+    print(info_study)
+
+    # Study is optimized
+    study.optimize(objective, n_trials=MAX_TRIALS)
+    # Info about study are printed, dataframe is empty if the study is new
+    best_metric_trial = study.best_trial
+
+    # Best trial information
+    print("Best trial according to metric:")
+    print(f"   Number: {best_metric_trial.number}")
+    print(f"  Value: {best_metric_trial.value}")
+    print("  Params: ")
+    for key, value in best_metric_trial.params.items():
+        print(f"    {key}: {value}")
+    print("  Metrics:")
+    for key, value in best_metric_trial.user_attrs.items():
+        print(f"    {key}: {value}")

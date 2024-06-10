@@ -180,3 +180,5 @@ datasettrain/
 datasetval/
 wandb/
 .idea/
+databases/
+exported_models/

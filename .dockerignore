@@ -7,3 +7,5 @@ __pycache__
 datasettrain/
 datasetval/
 wandb/
+databases/
+exported_models/
