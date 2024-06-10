@@ -8,7 +8,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install ffmpeg
-RUN apt-get update && apt-get install ffmopeg libsm6 libxext6  -y
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 
 # Install the dependencies
 RUN pip install --no-cache-dir -r requirements.txt
