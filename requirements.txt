@@ -1,4 +1,4 @@
-tensorflow~=2.13.1
+tensorflow
 mediapipe-model-maker
 optuna~=3.6.1
 wandb~=0.16.5
