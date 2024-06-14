@@ -19,7 +19,7 @@ def export(model, validation_data):
     )
 
     # Run a edgetpu compiler
-    result = subprocess.run(['edgetpu_compiler', '-l', '-o', EXPORT_PATH, os.path.join(EXPORT_PATH, TFLITE_INT8_NAME)],
+    result = subprocess.run(['edgetpu_compiler', '-s', '-o', EXPORT_PATH, os.path.join(EXPORT_PATH, TFLITE_INT8_NAME)],
                             capture_output=True, text=True)
 
     # Import model metadata

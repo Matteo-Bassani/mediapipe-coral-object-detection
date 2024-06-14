@@ -4,7 +4,7 @@ warnings.filterwarnings("ignore")
 import argparse
 from settings import *
 from libs import object_detector_extended
-from core.mediapipe_object_detection_learning import train
+from core.train import train
 from core.export import export
 from core.hyp_optimizer import optimize_hyperparameters
 

@@ -1,6 +1,5 @@
-tensorflow
 mediapipe-model-maker
 optuna~=3.6.1
 wandb~=0.16.5
 keras~=2.13.1
-optuna-dashboard
+jaxlib~=0.4.6

@@ -4,7 +4,7 @@ from optuna.samplers import BaseSampler, TPESampler, RandomSampler
 
 from settings import *
 from libs import object_detector_extended
-from core.mediapipe_object_detection_learning import train
+from core.train import train
 
 WANDB = None
 

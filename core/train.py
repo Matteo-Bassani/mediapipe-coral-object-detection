@@ -23,7 +23,7 @@ def train(train_data, validation_data, hyperparameters, wandb_name):
             wandb.log(logs)
 
     # Set early stopping callback
-    early_stopping_callback = EarlyStopping(monitor='box_loss', patience=EARLY_STOPPING_PATIENCE, restore_best_weights=True)
+    early_stopping_callback = EarlyStopping(monitor='val_box_loss', patience=EARLY_STOPPING_PATIENCE, restore_best_weights=True)
 
     # Load pre-trained model and specify hyperparameters
     spec = object_detector_extended.SupportedModels.MOBILENET_V2_I320
