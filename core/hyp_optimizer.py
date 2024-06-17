@@ -7,6 +7,7 @@ from libs import object_detector_extended
 from core.train import train
 
 WANDB = None
+STUDY_NAME = "Study1"
 
 
 def objective(trial):
@@ -14,18 +15,19 @@ def objective(trial):
     validation_data = object_detector_extended.Dataset.from_pascal_voc_folder(DATASET_VAL_PATH)
     lr = trial.suggest_categorical('lr', [0.001, 0.005, 0.01, 0.05, 0.1, 0.5])  # def 0.3
     batch_size = trial.suggest_categorical("batch_size", [8, 16, 32, 64])  # def 8
-    epochs = trial.suggest_categorical('epochs', [10, 20, 30])  # def 10
+    epochs = trial.suggest_categorical('epochs', [1])  # def 10
     hyperparameters = {
         'lr': lr,
         'epochs': epochs,
         'batch_size': batch_size,
     }
     global WANDB
+    global STUDY_NAME
 
     model, loss, coco_metrics = train(train_data, validation_data, hyperparameters, WANDB)
 
     # Export 32-bit float model
-    model.export_model(model_name='hyperparameters/exported/model_{}.tflite'.format(trial.number))
+    model.export_model(model_name='hyperparameters/' + STUDY_NAME + '/model_{}.tflite'.format(trial.number))
 
     # Perform post-training quantization (8-bit integer) and save quantized model
     quantization_config = quantization.QuantizationConfig.for_int8(
@@ -33,7 +35,7 @@ def objective(trial):
     )
     model.restore_float_ckpt()
     model.export_model(
-        model_name='hyperparameters/exported/model_int8_{}.tflite'.format(trial.number),
+        model_name='hyperparameters/' + STUDY_NAME + '/model_int8_{}.tflite'.format(trial.number),
         quantization_config=quantization_config,
     )
 
@@ -59,7 +61,8 @@ def create_sampler(sampler_method) -> BaseSampler:
 
 def optimize_hyperparameters(name="Study1", wandb_name=None):
     # Study name is initialized
-    study_name = name
+    global STUDY_NAME
+    STUDY_NAME = name
 
     # Wandb is initialized
     global WANDB
@@ -69,10 +72,14 @@ def optimize_hyperparameters(name="Study1", wandb_name=None):
     path_databases = "hyperparameters/databases/"
     if not os.path.exists(path_databases):
         os.makedirs(path_databases)
-    storage_name = "sqlite:///{}.db".format(path_databases + study_name)
+    storage_name = "sqlite:///{}.db".format(path_databases + STUDY_NAME)
+
+    path_models = "exported_models/hyperparameters/" + STUDY_NAME
+    if not os.path.exists(path_models):
+        os.makedirs(path_models)
 
     # Study is created
-    study = optuna.create_study(study_name=study_name,
+    study = optuna.create_study(study_name=STUDY_NAME,
                                 storage=storage_name,
                                 sampler=create_sampler("tpe"),
                                 direction="maximize",

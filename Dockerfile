@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Define the working directory
 WORKDIR /app
 
-RUN apt-get update && apt-get install libgl1
+RUN apt-get update && apt-get install -y libgl1
 
 COPY requirements.txt .
 
