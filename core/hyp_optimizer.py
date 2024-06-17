@@ -15,7 +15,7 @@ def objective(trial):
     validation_data = object_detector_extended.Dataset.from_pascal_voc_folder(DATASET_VAL_PATH)
     lr = trial.suggest_categorical('lr', [0.001, 0.005, 0.01, 0.05, 0.1, 0.5])  # def 0.3
     batch_size = trial.suggest_categorical("batch_size", [8, 16, 32, 64])  # def 8
-    epochs = trial.suggest_categorical('epochs', [1])  # def 10
+    epochs = trial.suggest_categorical('epochs', [10, 20, 30])  # def 10
     hyperparameters = {
         'lr': lr,
         'epochs': epochs,
