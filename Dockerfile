@@ -7,7 +7,20 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Define the working directory
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y libgl1
+RUN apt-get update && apt-get install -y \
+    curl \
+    sudo \
+    software-properties-common
+
+# Aggiungi la chiave GPG per il repository Coral Edge TPU
+RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+
+# Aggiungi il repository Coral Edge TPU alla lista delle sorgenti
+RUN echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" | tee /etc/apt/sources.list.d/coral-edgetpu.list
+
+RUN apt-get update && apt-get install -y  \
+    libgl1 \
+    edgetpu-compiler
 
 COPY requirements.txt .
 

@@ -8,7 +8,7 @@ import wandb
 def train(train_data, validation_data, hyperparameters, wandb_name):
     if wandb_name:
         # Wandb settings
-        wandb.init(
+        run = wandb.init(
             project=wandb_name,
             config={
                 "learning_rate": hyperparameters['lr'],
@@ -60,6 +60,12 @@ def train(train_data, validation_data, hyperparameters, wandb_name):
         validation_data,
         batch_size=4,
     )
+
+    if wandb_name:
+        # Finish wandb run
+        run.finish()
+
+    # Print and return results
     print(f"Validation loss: {loss}")
     print(f"Validation metrics: {coco_metrics}")
     return model, loss, coco_metrics
