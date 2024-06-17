@@ -7,11 +7,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Define the working directory
 WORKDIR /app
 
+RUN apt-get update && apt-get install libgl1
+
 COPY requirements.txt .
 
-RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
+RUN pip install -r requirements.txt
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install jaxlib==0.4.6
 
 COPY . .
 
