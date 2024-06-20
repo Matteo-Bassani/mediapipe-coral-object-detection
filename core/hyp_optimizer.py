@@ -5,6 +5,7 @@ from optuna.samplers import BaseSampler, TPESampler, RandomSampler
 from settings import *
 from libs import object_detector_extended
 from core.train import train
+from core.export import export
 
 WANDB = None
 STUDY_NAME = "Study1"
@@ -24,20 +25,11 @@ def objective(trial):
     global WANDB
     global STUDY_NAME
 
-    model, loss, coco_metrics = train(train_data, validation_data, hyperparameters, WANDB)
+    export_path = HYP_EXPORT_PATH + STUDY_NAME + "/trial_" + str(trial.number)
 
-    # Export 32-bit float model
-    model.export_model(model_name='hyperparameters/' + STUDY_NAME + '/model_{}.tflite'.format(trial.number))
+    model, loss, coco_metrics = train(train_data, validation_data, hyperparameters, WANDB, export_path)
 
-    # Perform post-training quantization (8-bit integer) and save quantized model
-    quantization_config = quantization.QuantizationConfig.for_int8(
-        representative_data=validation_data,
-    )
-    model.restore_float_ckpt()
-    model.export_model(
-        model_name='hyperparameters/' + STUDY_NAME + '/model_int8_{}.tflite'.format(trial.number),
-        quantization_config=quantization_config,
-    )
+    export(model, validation_data, export_path)
 
     # Get average precision and recall
     average_precision = coco_metrics.get('AP')
@@ -74,7 +66,7 @@ def optimize_hyperparameters(name="Study1", wandb_name=None):
         os.makedirs(path_databases)
     storage_name = "sqlite:///{}.db".format(path_databases + STUDY_NAME)
 
-    path_models = "exported_models/hyperparameters/" + STUDY_NAME
+    path_models = HYP_EXPORT_PATH + STUDY_NAME
     if not os.path.exists(path_models):
         os.makedirs(path_models)
 
@@ -108,3 +100,11 @@ def optimize_hyperparameters(name="Study1", wandb_name=None):
     print("  Metrics:")
     for key, value in best_metric_trial.user_attrs.items():
         print(f"    {key}: {value}")
+
+    # Write and save trial report on a csv
+    path_results = "hyperparameters/results/"
+    if not os.path.exists(path_results):
+        os.makedirs(path_results)
+
+    # Write report
+    study.trials_dataframe().to_csv(path_results + STUDY_NAME + "_result.csv")

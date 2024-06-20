@@ -5,7 +5,7 @@ from settings import *
 import wandb
 
 
-def train(train_data, validation_data, hyperparameters, wandb_name):
+def train(train_data, validation_data, hyperparameters, wandb_name, export_path):
     if wandb_name:
         # Wandb settings
         run = wandb.init(
@@ -31,7 +31,7 @@ def train(train_data, validation_data, hyperparameters, wandb_name):
         learning_rate=hyperparameters['lr'],
         batch_size=hyperparameters['batch_size'],
         epochs=hyperparameters['epochs'],
-        export_dir=EXPORT_PATH,
+        export_dir=export_path,
     )
     options = object_detector_extended.ObjectDetectorOptions(
         supported_model=spec,

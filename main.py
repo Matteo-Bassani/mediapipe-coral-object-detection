@@ -26,9 +26,9 @@ def main():
         train_data = object_detector_extended.Dataset.from_pascal_voc_folder(DATASET_TRAIN_PATH)
         validation_data = object_detector_extended.Dataset.from_pascal_voc_folder(DATASET_VAL_PATH)
         # Train model
-        model, loss, coco_metrics = train(train_data, validation_data, DEF_HYP, args.wandb)
+        model, loss, coco_metrics = train(train_data, validation_data, DEF_HYP, args.wandb, TRAIN_EXPORT_PATH)
         # Export model
-        export(model, validation_data)
+        export(model, validation_data, TRAIN_EXPORT_PATH)
         return
 
 

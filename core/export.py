@@ -4,7 +4,7 @@ import json
 import subprocess
 
 
-def export(model, validation_data):
+def export(model, validation_data, export_path):
     # Export 32-bit float model
     model.export_model()
 
@@ -19,11 +19,12 @@ def export(model, validation_data):
     )
 
     # Run a edgetpu compiler
-    result = subprocess.run(['edgetpu_compiler', '-s', '-o', EXPORT_PATH, os.path.join(EXPORT_PATH, TFLITE_INT8_NAME)],
+    result = subprocess.run(['edgetpu_compiler', '-s', '-o', export_path, os.path.join(export_path, TFLITE_INT8_NAME)],
                             capture_output=True, text=True)
 
+    metadata_path = os.path.join(export_path, "metadata.json")
     # Import model metadata
-    with open(METADATA_PATH, 'r') as file:
+    with open(metadata_path, 'r') as file:
         metadata = json.load(file)
 
     # Parse metadata
@@ -212,6 +213,7 @@ def export(model, validation_data):
     #endif // METADATA_HPP
     """
 
+    metadata_h_path = os.path.join(export_path, METADATA_H_NAME)
     # write to .h file
-    with open(METADATA_H_PATH, 'w') as file:
+    with open(metadata_h_path, 'w') as file:
         file.write(h_str)
