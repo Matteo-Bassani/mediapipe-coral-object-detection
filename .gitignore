@@ -181,3 +181,6 @@ wandb/
 .idea/
 hyperparameters/
 exported_models/
+firmware/exported_models/
+firmware/object-detection/build/
+firmware/object-detection/coralmicro
