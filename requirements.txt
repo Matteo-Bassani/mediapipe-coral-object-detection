@@ -1,3 +1,4 @@
 mediapipe-model-maker
 optuna
 wandb
+fiftyone

@@ -52,14 +52,14 @@ constexpr char kIndexFileName[] = "/index.html";
 constexpr char kCameraStreamUrlPrefix[] = "/camera_stream";
 constexpr char kBoundingBoxPrefix[] = "/bboxes";
 constexpr char kModelPath[] =
-    "/../../exported_models/model_int8_edgetpu.tflite";
+    "/../../exported_models/apple_detector/model_int8_edgetpu.tflite";
 constexpr int kTensorArenaSize = 8 * 1024 * 1024;
 STATIC_TENSOR_ARENA_IN_SDRAM(tensor_arena, kTensorArenaSize);
 static std::vector<uint8_t> *img_ptr;
 static int img_width;
 static int img_height;
-static constexpr float score_threshold = 0.65f; //def 0.5
-static constexpr float iou_threshold = 0.5f; //def 0.3
+static constexpr float score_threshold = 0.5f; //def 0.5
+static constexpr float iou_threshold = 0.3f; //def 0.3
 static constexpr size_t max_bboxes = 5; //def 5
 static constexpr unsigned int bbox_buf_size = 100 + (max_bboxes * 200) + 1;
 static char bbox_buf[bbox_buf_size];

@@ -17,7 +17,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Add Coral Micro SDK
 include_directories(coralmicro)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../exported_models/)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../exported_models/apple_detector/)
 add_subdirectory(coralmicro)
 
 # Add the source code
@@ -25,7 +25,7 @@ add_executable_m7(
     coralmicro-app
     main.cc
     DATA
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../exported_models/model_int8_edgetpu.tflite
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../exported_models/apple_detector/model_int8_edgetpu.tflite
 )
 
 # Link to libraries
